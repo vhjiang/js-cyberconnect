@@ -71,6 +71,7 @@ class CyberConnect {
           this.provider,
           this.address
         );
+        break;
       }
       case Blockchain.SOLANA: {
         if (!this.provider.publicKey) {
@@ -91,6 +92,8 @@ class CyberConnect {
           this.address,
           this.chainRef
         );
+
+        break;
       }
     }
   }
