@@ -13,7 +13,11 @@ export const connectQuerySchema = ({
   namespace: string;
   signature: string;
 }) => {
-  return `mutation {\n  follow(fromAddr: \"${fromAddr}\", toAddr: \"${toAddr}\", alias: \"${alias}\", namespace: \"${namespace}\", signature: \"${signature}\") {\n    result\n  }\n}\n`;
+  return {
+    operationName: 'follow',
+    query: `mutation follow {\n  follow(fromAddr: \"${fromAddr}\", toAddr: \"${toAddr}\", alias: \"${alias}\", namespace: \"${namespace}\", signature: \"${signature}\") {\n    result\n  }\n}\n`,
+    variables: {},
+  };
 };
 
 export const disconnectQuerySchema = ({
@@ -27,7 +31,11 @@ export const disconnectQuerySchema = ({
   namespace: string;
   signature: String;
 }) => {
-  return `mutation {\n  unfollow(fromAddr: \"${fromAddr}\", toAddr: \"${toAddr}\", namespace: \"${namespace}\", signature: \"${signature}\") {\n    result\n  }\n}\n`;
+  return {
+    operationName: 'unfollow',
+    query: `mutation unfollow {\n  unfollow(fromAddr: \"${fromAddr}\", toAddr: \"${toAddr}\", namespace: \"${namespace}\", signature: \"${signature}\") {\n    result\n  }\n}\n`,
+    variables: {},
+  };
 };
 
 export const setAliasQuerySchema = ({
@@ -43,7 +51,11 @@ export const setAliasQuerySchema = ({
   signature: string;
   alias: string;
 }) => {
-  return `mutation {\n  setAlias(fromAddr: \"${fromAddr}\", toAddr: \"${toAddr}\", alias: \"${alias}\", namespace: \"${namespace}\", signature: \"${signature}\") {\n    result\n  }\n}\n`;
+  return {
+    operationName: 'setAlias',
+    query: `mutation setAlias {\n  setAlias(fromAddr: \"${fromAddr}\", toAddr: \"${toAddr}\", alias: \"${alias}\", namespace: \"${namespace}\", signature: \"${signature}\") {\n    result\n  }\n}\n`,
+    variables: {},
+  };
 };
 
 export const querySchemas = {
@@ -69,15 +81,14 @@ export const request = async (url = '', data = {}) => {
 };
 
 export const handleQuery = (
-  query: string,
-  url: string,
-  variables: object = {}
+  data: {
+    query: string;
+    variables: object;
+    operationName: string;
+  },
+  url: string
 ) => {
-  return request(url, {
-    query,
-    variables,
-    operationName: null,
-  });
+  return request(url, data);
 };
 
 export const follow = ({
