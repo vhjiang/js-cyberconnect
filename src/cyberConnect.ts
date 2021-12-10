@@ -173,11 +173,15 @@ class CyberConnect {
       );
     }
 
-    const result = (await this.idxInstance.get(
-      'cyberConnect'
-    )) as CyberConnetStore;
+    try {
+      const result = (await this.idxInstance.get(
+        'cyberConnect'
+      )) as CyberConnetStore;
 
-    return result?.outboundLink || null;
+      return result?.outboundLink || [];
+    } catch (e) {
+      throw new ConnectError(ErrorCode.CeramicError, e as string);
+    }
   }
 
   private async ceramicConnect(targetAddr: string, alias: string = '') {
@@ -185,13 +189,6 @@ class CyberConnect {
       await this.setupIdx();
 
       const outboundLink = await this.getOutboundLink();
-
-      if (!outboundLink) {
-        throw new ConnectError(
-          ErrorCode.CeramicError,
-          'Can not get ceramic outboundLink'
-        );
-      }
 
       if (!this.idxInstance) {
         throw new ConnectError(
@@ -228,13 +225,6 @@ class CyberConnect {
 
       const outboundLink = await this.getOutboundLink();
 
-      if (!outboundLink) {
-        throw new ConnectError(
-          ErrorCode.CeramicError,
-          'Can not get ceramic outboundLink'
-        );
-      }
-
       if (!this.idxInstance) {
         throw new ConnectError(
           ErrorCode.CeramicError,
@@ -259,13 +249,6 @@ class CyberConnect {
       await this.setupIdx();
 
       const outboundLink = await this.getOutboundLink();
-
-      if (!outboundLink) {
-        throw new ConnectError(
-          ErrorCode.CeramicError,
-          'Can not get ceramic outboundLink'
-        );
-      }
 
       if (!this.idxInstance) {
         throw new ConnectError(
