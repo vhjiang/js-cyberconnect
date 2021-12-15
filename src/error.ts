@@ -20,6 +20,7 @@ export enum ErrorCode {
   GraphqlError = 'GraphqlError',
   CeramicError = 'CeramicError',
   AuthProviderError = 'AuthProviderError',
+  SignJwtError = 'SignJwtError',
 }
 
 const errors: { [key in ErrorCode]: string } = {
@@ -30,4 +31,5 @@ const errors: { [key in ErrorCode]: string } = {
   GraphqlError: '',
   CeramicError: '',
   AuthProviderError: '',
+  SignJwtError: '',
 };

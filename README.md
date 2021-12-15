@@ -29,6 +29,9 @@ const cyberConnect = new CyberConnect({
   chain: Blockchain.ETH,
   provider: provider,
 });
+
+// You need to call init before doing follow/unfollow
+await cyberConnect.init();
 ```
 
 - `namespace` - Your applciation name.
