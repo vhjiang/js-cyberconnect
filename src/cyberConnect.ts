@@ -28,7 +28,7 @@ class CyberConnect {
   chain: Blockchain = Blockchain.ETH;
   chainRef: string = '';
   provider: any = null;
-  accountLink: any = null;
+  accountLink: Caip10Link | null = null;
   authId: string = '';
   did: DID | null = null;
   threeId: ThreeIdProvider | null = null;
@@ -101,7 +101,7 @@ class CyberConnect {
     }
   }
 
-  async authenticate() {
+  private async setupAuthProvider() {
     if (this.signature) {
       return;
     }
@@ -118,7 +118,7 @@ class CyberConnect {
     this.signature = rst;
   }
 
-  private async signWithJwt() {
+  async signWithJwt() {
     const timestamp = new Date().getTime();
 
     const payload = {
@@ -165,7 +165,7 @@ class CyberConnect {
     return jwsString;
   }
 
-  private async setupIdx() {
+  async setupDid() {
     if (this.idxInstance) {
       return;
     }
@@ -208,7 +208,11 @@ class CyberConnect {
     await this.ceramicClient.setDID(this.did);
   }
 
-  private createIdx() {
+  createIdx() {
+    if (this.idxInstance) {
+      return;
+    }
+
     this.idxInstance = new IDX({
       ceramic: this.ceramicClient,
       aliases: {
@@ -218,7 +222,7 @@ class CyberConnect {
     });
   }
 
-  private async createAccountLink() {
+  async createAccountLink() {
     if (this.accountLink && !!this.accountLink.did) {
       return;
     }
@@ -228,7 +232,7 @@ class CyberConnect {
       this.authId
     );
 
-    if (!this.accountLink.did && this.did) {
+    if (!this.accountLink.did && this.did && this.authProvider) {
       await this.accountLink.setDid(this.did.id, this.authProvider, {
         anchor: false,
         publish: false,
@@ -255,10 +259,10 @@ class CyberConnect {
     }
   }
 
-  async init() {
+  async authenticate() {
     try {
-      await this.authenticate();
-      await this.setupIdx();
+      await this.setupAuthProvider();
+      await this.setupDid();
       await this.createAccountLink();
       this.createIdx();
     } catch (e) {
@@ -354,7 +358,7 @@ class CyberConnect {
   }
 
   async connect(targetAddr: string, alias: string = '') {
-    await this.init();
+    await this.authenticate();
 
     try {
       const sign = await this.signWithJwt();
@@ -384,7 +388,7 @@ class CyberConnect {
   }
 
   async disconnect(targetAddr: string) {
-    await this.init();
+    await this.authenticate();
 
     try {
       const sign = await this.signWithJwt();
@@ -413,7 +417,7 @@ class CyberConnect {
   }
 
   async setAlias(targetAddr: string, alias: string) {
-    await this.init();
+    await this.authenticate();
 
     try {
       const sign = await this.signWithJwt();
