@@ -1,6 +1,6 @@
 # CyberConnect
 
-The JavaScript library provides `CyberConnect` class which includes two primary functions, connect and disconnect. The library encapsulates the complex authentication logic (authenticate to Ceramic Network) into easy-to-use functions.
+The JavaScript library provides `CyberConnect` class which includes functions to allows users to control their decentralized identity([DIDs](https://www.w3.org/TR/did-core/)) and social graph data. The library encapsulates the complex authentication logic (authenticate to Ceramic Network) into easy-to-use functions.
 [CyberConnect API](https://docs.cyberconnect.me/connect-and-disconnect).
 
 ## Getting started
@@ -29,9 +29,6 @@ const cyberConnect = new CyberConnect({
   chain: Blockchain.ETH,
   provider: provider,
 });
-
-// You need to call init before doing follow/unfollow
-await cyberConnect.init();
 ```
 
 - `namespace` - Your applciation name.
@@ -40,6 +37,22 @@ await cyberConnect.init();
 - `provider` - The corresponding provider of the given chain.
 
 See [Solana](#Solana) for Solana demo.
+
+#### Authenticate
+
+The `authenticate()` includes two signs for `AuthProvider` and [Capi10Link]("https://developers.ceramic.network/streamtypes/caip-10-link/api/").
+
+All users should sign for `AuthProvider` every session.
+
+Only first time users need to sign for `Capi10Link` and it may takes 5-10 seconds.
+
+Only authenticate once if call `cyberconnect.authenticate()` multiple time.
+
+You can run `cyberconnect.authenticate()` somewhere before doing `connect` or `disconnect` to do the authentication first, then you don't need to sign when you call other functions.
+
+```ts
+await cyberConnect.authenticate();
+```
 
 #### Connect
 
@@ -57,6 +70,15 @@ cyberConnect.disconnect(targetAddr);
 ```
 
 - `targetAddr` - The target wallet address to disconnect.
+
+#### SetAlias
+
+```ts
+cyberConnect.setAlias(targetAddr, alias);
+```
+
+- `targetAddr` - The target wallet address to disconnect.
+- `alias` - The alias for the target address.
 
 ### Solana
 
@@ -84,3 +106,7 @@ const cyberConnect = new CyberConnect({
   chainRef: Solana.SOLANA_MAINNET_CHAIN_REF,
 });
 ```
+
+## Contributing
+
+We are happy to accept small and large contributions, feel free to make a suggestion or submit a pull request.
