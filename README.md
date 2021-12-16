@@ -48,7 +48,9 @@ Only first time users need to sign for `Capi10Link` and it may takes 5-10 second
 
 Only authenticate once if call `cyberconnect.authenticate()` multiple time.
 
-You can run `cyberconnect.authenticate()` somewhere before doing `connect` or `disconnect` to do the authentication first, then you don't need to sign when you call other functions.
+You can run `cyberconnect.authenticate()` somewhere before doing `connect` to do the authentication first, then the user doesn't need to sign when calling `connect`. 
+
+You can also call `connect` directly, then the user have to sign during the function call.
 
 ```ts
 await cyberConnect.authenticate();
