@@ -38,6 +38,28 @@ export const disconnectQuerySchema = ({
   };
 };
 
+export const authQuerySchema = ({
+  address,
+  signature,
+}: {
+  address: string,
+  signature: string,
+}) => {
+  return {
+    operationName: 'auth',
+    query: `mutation TmpAuth (
+      $address: String!
+      $signature: String!
+    ) {
+      auth(address: $address, signature: $signature) {
+        result
+        authToken
+      }
+    }`,
+    variables: {},
+  };
+};
+
 export const setAliasQuerySchema = ({
   fromAddr,
   toAddr,
@@ -61,6 +83,7 @@ export const setAliasQuerySchema = ({
 export const querySchemas = {
   connect: connectQuerySchema,
   disconnect: disconnectQuerySchema,
+  auth: authQuerySchema,
   setAlias: setAliasQuerySchema,
 };
 
@@ -89,6 +112,22 @@ export const handleQuery = (
   url: string
 ) => {
   return request(url, data);
+};
+
+export const auth = ({
+  address,
+  signature,
+  url
+}: {
+  address: string;
+  signature: string;
+  url: string
+}) => {
+  const result = querySchemas['auth']({
+    address,
+    signature,
+  });
+  return handleQuery(result, url);
 };
 
 export const follow = ({
