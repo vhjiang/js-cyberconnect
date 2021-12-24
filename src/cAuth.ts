@@ -12,8 +12,7 @@ export const personalSign = async (provider: any, address: string) => {
   ]);
 };
 
-export const tmpAuth = async (provider: any, address: string, url: string) => {
-  console.log('temp auth');
+export const cAuth = async (provider: any, address: string, url: string) => {
   const signature = await personalSign(provider, address);
   console.log(signature);
   if (signature) {
@@ -35,7 +34,7 @@ export const tmpAuth = async (provider: any, address: string, url: string) => {
       res.data.auth.result === 'SUCCESS' &&
       res.data.auth.authToken
     ) {
-      window.localStorage.setItem(
+      window?.localStorage?.setItem(
         localstorageKeyNameSpace,
         res.data.auth.authToken,
       );

@@ -15,7 +15,7 @@ import { Endpoint, Blockchain, CyberConnetStore, Config } from './types';
 import { getAddressByProvider } from './utils';
 import { Caip10Link } from '@ceramicnetwork/stream-caip10-link';
 import { Env } from '.';
-import { tmpAuth, localstorageKeyNameSpace } from './tmp';
+import { cAuth, localstorageKeyNameSpace } from './cAuth';
 import { DFLAG } from './constant';
 class CyberConnect {
   address: string = '';
@@ -277,11 +277,7 @@ class CyberConnect {
     }
     try {
       if (!DFLAG) {
-        await tmpAuth(
-          this.provider,
-          this.address,
-          this.endpoint.cyberConnectApi,
-        );
+        await cAuth(this.provider, this.address, this.endpoint.cyberConnectApi);
       } else {
         await this.setupAuthProvider();
         await this.setupDid();
