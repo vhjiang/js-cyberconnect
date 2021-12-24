@@ -1,9 +1,8 @@
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { hexlify } from '@ethersproject/bytes';
 import { auth } from './queries';
-
+import { C_ACCESS_TOKEN_KEY } from './constant';
 const msgToSign = 'Sign in to CyberConnect from this device';
-export const localstorageKeyNameSpace = 'CYBERCONNECT_ACCESS_TOKEN';
 
 export const personalSign = async (provider: any, address: string) => {
   return await provider.send('personal_sign', [
@@ -13,8 +12,10 @@ export const personalSign = async (provider: any, address: string) => {
 };
 
 export const cAuth = async (provider: any, address: string, url: string) => {
+  if (window.localStorage.getItem(C_ACCESS_TOKEN_KEY)) {
+    return window.localStorage.getItem(C_ACCESS_TOKEN_KEY);
+  }
   const signature = await personalSign(provider, address);
-  console.log(signature);
   if (signature) {
     let sig;
     if (typeof signature == 'string') {
@@ -35,7 +36,7 @@ export const cAuth = async (provider: any, address: string, url: string) => {
       res.data.auth.authToken
     ) {
       window?.localStorage?.setItem(
-        localstorageKeyNameSpace,
+        C_ACCESS_TOKEN_KEY,
         res.data.auth.authToken,
       );
       return res;

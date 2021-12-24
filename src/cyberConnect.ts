@@ -15,8 +15,8 @@ import { Endpoint, Blockchain, CyberConnetStore, Config } from './types';
 import { getAddressByProvider } from './utils';
 import { Caip10Link } from '@ceramicnetwork/stream-caip10-link';
 import { Env } from '.';
-import { cAuth, localstorageKeyNameSpace } from './cAuth';
-import { DFLAG } from './constant';
+import { cAuth } from './cAuth';
+import { DFLAG, C_ACCESS_TOKEN_KEY } from './constant';
 class CyberConnect {
   address: string = '';
   namespace: string;
@@ -119,8 +119,8 @@ class CyberConnect {
   }
 
   async signWithJwt() {
-    if (localStorage[localstorageKeyNameSpace] && !DFLAG) {
-      return localStorage[localstorageKeyNameSpace];
+    if (localStorage[C_ACCESS_TOKEN_KEY] && !DFLAG) {
+      return localStorage[C_ACCESS_TOKEN_KEY];
     } else if (DFLAG) {
       const timestamp = new Date().getTime();
 
