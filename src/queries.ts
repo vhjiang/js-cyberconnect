@@ -1,4 +1,4 @@
-export type Query = "connect" | "disconnect";
+export type Query = 'connect' | 'disconnect';
 
 export const connectQuerySchema = ({
   fromAddr,
@@ -14,7 +14,7 @@ export const connectQuerySchema = ({
   signature: string;
 }) => {
   return {
-    operationName: "follow",
+    operationName: 'follow',
     query: `mutation follow {\n  follow(fromAddr: \"${fromAddr}\", toAddr: \"${toAddr}\", alias: \"${alias}\", namespace: \"${namespace}\", signature: \"${signature}\") {\n    result\n  }\n}\n`,
     variables: {},
   };
@@ -32,7 +32,7 @@ export const disconnectQuerySchema = ({
   signature: String;
 }) => {
   return {
-    operationName: "unfollow",
+    operationName: 'unfollow',
     query: `mutation unfollow {\n  unfollow(fromAddr: \"${fromAddr}\", toAddr: \"${toAddr}\", namespace: \"${namespace}\", signature: \"${signature}\") {\n    result\n  }\n}\n`,
     variables: {},
   };
@@ -46,7 +46,7 @@ export const tmpAuthSchema = ({
   signature: string;
 }) => {
   return {
-    operationName: "auth",
+    operationName: 'auth',
     query: `mutation auth($address: String!, $signature: String!) {
       auth(address: $address, signature: $signature) {
         result
@@ -71,7 +71,7 @@ export const setAliasQuerySchema = ({
   alias: string;
 }) => {
   return {
-    operationName: "setAlias",
+    operationName: 'setAlias',
     query: `mutation setAlias {\n  setAlias(fromAddr: \"${fromAddr}\", toAddr: \"${toAddr}\", alias: \"${alias}\", namespace: \"${namespace}\", signature: \"${signature}\") {\n    result\n  }\n}\n`,
     variables: {},
   };
@@ -84,16 +84,16 @@ export const querySchemas = {
   setAlias: setAliasQuerySchema,
 };
 
-export const request = async (url = "", data = {}) => {
+export const request = async (url = '', data = {}) => {
   // Default options are marked with *
   const response = await fetch(url, {
-    method: "POST",
-    mode: "cors",
-    cache: "no-cache",
+    method: 'POST',
+    mode: 'cors',
+    cache: 'no-cache',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
-    referrerPolicy: "no-referrer",
+    referrerPolicy: 'no-referrer',
     body: JSON.stringify(data),
   });
 
@@ -106,7 +106,7 @@ export const handleQuery = (
     variables: object;
     operationName: string;
   },
-  url: string
+  url: string,
 ) => {
   console.log(data);
   return request(url, data);
@@ -121,7 +121,7 @@ export const auth = ({
   signature: string;
   url: string;
 }) => {
-  const result = querySchemas["auth"]({
+  const result = querySchemas['auth']({
     address,
     signature,
   });
@@ -143,7 +143,7 @@ export const follow = ({
   signature: string;
   url: string;
 }) => {
-  const schema = querySchemas["connect"]({
+  const schema = querySchemas['connect']({
     fromAddr,
     toAddr,
     alias,
@@ -166,7 +166,7 @@ export const unfollow = ({
   signature: string;
   url: string;
 }) => {
-  const schema = querySchemas["disconnect"]({
+  const schema = querySchemas['disconnect']({
     fromAddr,
     toAddr,
     namespace,
@@ -190,7 +190,7 @@ export const setAlias = ({
   signature: string;
   url: string;
 }) => {
-  const schema = querySchemas["setAlias"]({
+  const schema = querySchemas['setAlias']({
     fromAddr,
     toAddr,
     alias,
