@@ -55,6 +55,7 @@ class CyberConnect {
       ...threeIdResolver,
       ...keyDidResolver,
     };
+    delete window.localStorage[C_ACCESS_TOKEN_KEY];
   }
 
   async getAuthProvider() {
