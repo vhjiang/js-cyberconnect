@@ -77,6 +77,28 @@ export const setAliasQuerySchema = ({
   };
 };
 
+// export const getSocialConnectionCount = ({ address }: { address: string }) => {
+//   return {
+//     operationName: 'getSocialConnectionCount',
+//     query: `identity($address: String!) {
+//       identity(address: $address) {
+//         followingCount(namespace: "")
+//         followerCount(namespace: "")
+//       }`,
+//     variables: { address },
+//   };
+// };
+// export const getAllSocialConnections = ({ address }: { address: string }) => {
+//   return {
+//     operationName: 'getAllSocialConnections',
+//     query: `identity($address: String!) {
+//       identity(address: $address) {
+//         followingCount(namespace: "")
+//       }`,
+//     variables: { address },
+//   };
+// };
+
 export const querySchemas = {
   connect: connectQuerySchema,
   disconnect: disconnectQuerySchema,
