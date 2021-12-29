@@ -1,3 +1,4 @@
+import { DFLAG, C_ACCESS_TOKEN_KEY } from './constant';
 export class ConnectError {
   code: ErrorCode;
   message: string;
@@ -5,6 +6,9 @@ export class ConnectError {
   constructor(code: ErrorCode, message?: string) {
     this.code = code;
     this.message = message || errors[code];
+    if (!DFLAG) {
+      delete window.localStorage[C_ACCESS_TOKEN_KEY];
+    }
   }
 
   printError() {

@@ -15,7 +15,8 @@ import { Endpoint, Blockchain, CyberConnectStore, Config } from './types';
 import { getAddressByProvider } from './utils';
 import { Caip10Link } from '@ceramicnetwork/stream-caip10-link';
 import { Env } from '.';
-
+import { cAuth } from './cAuth';
+import { DFLAG, C_ACCESS_TOKEN_KEY } from './constant';
 class CyberConnect {
   address: string = '';
   namespace: string;
@@ -36,7 +37,6 @@ class CyberConnect {
 
   constructor(config: Config) {
     const { provider, namespace, env, chainRef, chain } = config;
-
     if (!namespace) {
       throw new ConnectError(ErrorCode.EmptyNamespace);
     }
@@ -55,6 +55,7 @@ class CyberConnect {
       ...threeIdResolver,
       ...keyDidResolver,
     };
+    delete window.localStorage[C_ACCESS_TOKEN_KEY];
   }
 
   async getAuthProvider() {
@@ -72,7 +73,7 @@ class CyberConnect {
       case Blockchain.ETH: {
         this.authProvider = new EthereumAuthProvider(
           this.provider,
-          this.address
+          this.address,
         );
         break;
       }
@@ -80,20 +81,20 @@ class CyberConnect {
         if (!this.provider.publicKey) {
           throw new ConnectError(
             ErrorCode.AuthProviderError,
-            'Wallet Not Connected'
+            'Wallet Not Connected',
           );
         }
         if (!this.provider.signMessage) {
           throw new ConnectError(
             ErrorCode.AuthProviderError,
-            'Provider must implement signMessage'
+            'Provider must implement signMessage',
           );
         }
 
         this.authProvider = new SolanaAuthProvider(
           this.provider,
           this.address,
-          this.chainRef
+          this.chainRef,
         );
 
         break;
@@ -113,56 +114,65 @@ class CyberConnect {
     }
 
     const rst = await this.authProvider.authenticate(
-      'Allow this account to control your identity'
+      'Allow this account to control your identity',
     );
     this.signature = rst;
   }
 
   async signWithJwt() {
-    const timestamp = new Date().getTime();
+    if (localStorage[C_ACCESS_TOKEN_KEY] && !DFLAG) {
+      return localStorage[C_ACCESS_TOKEN_KEY];
+    } else if (DFLAG) {
+      const timestamp = new Date().getTime();
 
-    const payload = {
-      timestamp,
-      target: this.address,
-    };
+      const payload = {
+        timestamp,
+        target: this.address,
+      };
 
-    if (!this.threeId) {
-      throw new ConnectError(ErrorCode.SignJwtError, 'Empty ThreeId');
-    }
+      if (!this.threeId) {
+        throw new ConnectError(ErrorCode.SignJwtError, 'Empty ThreeId');
+      }
 
-    const req = {
-      method: 'did_createJWS',
-      params: { payload, did: this.threeId.id },
-    };
+      const req = {
+        method: 'did_createJWS',
+        params: { payload, did: this.threeId.id },
+      };
 
-    const id = 0;
+      const id = 0;
 
-    if (!this.threeIdProvider) {
-      throw new ConnectError(ErrorCode.SignJwtError, 'Empty ThreeId provider');
-    }
+      if (!this.threeIdProvider) {
+        throw new ConnectError(
+          ErrorCode.SignJwtError,
+          'Empty ThreeId provider',
+        );
+      }
 
-    const sendRes = await this.threeIdProvider.send(
-      Object.assign({ jsonrpc: '2.0', id }, req),
-      null
-    );
+      const sendRes = await this.threeIdProvider.send(
+        Object.assign({ jsonrpc: '2.0', id }, req),
+        null,
+      );
 
-    if (!sendRes || !sendRes.result) {
+      if (!sendRes || !sendRes.result) {
+        return '';
+      }
+
+      if (!this.did) {
+        throw new ConnectError(ErrorCode.SignJwtError, 'Empty DID');
+      }
+
+      const normalJWS = sendRes.result.jws;
+
+      const jwsString = [
+        normalJWS.signatures[0].protected,
+        normalJWS.payload,
+        normalJWS.signatures[0].signature,
+      ].join('.');
+
+      return jwsString;
+    } else {
       return '';
     }
-
-    if (!this.did) {
-      throw new ConnectError(ErrorCode.SignJwtError, 'Empty DID');
-    }
-
-    const normalJWS = sendRes.result.jws;
-
-    const jwsString = [
-      normalJWS.signatures[0].protected,
-      normalJWS.payload,
-      normalJWS.signatures[0].signature,
-    ].join('.');
-
-    return jwsString;
   }
 
   async setupDid() {
@@ -178,7 +188,7 @@ class CyberConnect {
     if (!this.ceramicClient) {
       new ConnectError(
         ErrorCode.CeramicError,
-        'Can not find ceramic client'
+        'Can not find ceramic client',
       ).printError();
       return;
     }
@@ -226,10 +236,9 @@ class CyberConnect {
     if (this.accountLink && !!this.accountLink.did) {
       return;
     }
-
     this.accountLink = await Caip10Link.fromAccount(
       this.ceramicClient,
-      this.authId
+      this.authId,
     );
 
     if (!this.accountLink.did && this.did && this.authProvider) {
@@ -244,13 +253,13 @@ class CyberConnect {
     if (!this.idxInstance) {
       throw new ConnectError(
         ErrorCode.CeramicError,
-        'Could not find idx instance'
+        'Could not find idx instance',
       );
     }
 
     try {
       const result = (await this.idxInstance.get(
-        'cyberConnect'
+        'cyberConnect',
       )) as CyberConnectStore;
 
       return result?.outboundLink || [];
@@ -258,13 +267,24 @@ class CyberConnect {
       throw new ConnectError(ErrorCode.CeramicError, e as string);
     }
   }
-
+  // first step
   async authenticate() {
+    if (!this.address) {
+      try {
+        this.address = await getAddressByProvider(this.provider, this.chain);
+      } catch (e) {
+        throw new ConnectError(ErrorCode.AuthProviderError, e as string);
+      }
+    }
     try {
-      await this.setupAuthProvider();
-      await this.setupDid();
-      await this.createAccountLink();
-      this.createIdx();
+      if (!DFLAG) {
+        await cAuth(this.provider, this.address, this.endpoint.cyberConnectApi);
+      } else {
+        await this.setupAuthProvider();
+        await this.setupDid();
+        await this.createAccountLink();
+        this.createIdx();
+      }
     } catch (e) {
       throw e;
     }
@@ -277,7 +297,7 @@ class CyberConnect {
       if (!this.idxInstance) {
         throw new ConnectError(
           ErrorCode.CeramicError,
-          'Could not find idx instance'
+          'Could not find idx instance',
         );
       }
 
@@ -312,7 +332,7 @@ class CyberConnect {
       if (!this.idxInstance) {
         throw new ConnectError(
           ErrorCode.CeramicError,
-          'Could not find idx instance'
+          'Could not find idx instance',
         );
       }
 
@@ -335,7 +355,7 @@ class CyberConnect {
       if (!this.idxInstance) {
         throw new ConnectError(
           ErrorCode.CeramicError,
-          'Could not find idx instance'
+          'Could not find idx instance',
         );
       }
 
@@ -349,7 +369,7 @@ class CyberConnect {
       } else {
         throw new ConnectError(
           ErrorCode.CeramicError,
-          "Couldn't find the target address in the given namespace"
+          "Couldn't find the target address in the given namespace",
         );
       }
     } catch (e) {
@@ -369,13 +389,13 @@ class CyberConnect {
         alias,
         namespace: this.namespace,
         url: this.endpoint.cyberConnectApi,
-        signature: sign,
+        signature: sign!,
       });
 
       if (resp?.data?.follow.result !== 'SUCCESS') {
         throw new ConnectError(
           ErrorCode.GraphqlError,
-          resp?.data?.follow.result
+          resp?.data?.follow.result,
         );
       }
 
@@ -383,8 +403,9 @@ class CyberConnect {
     } catch (e: any) {
       throw new ConnectError(ErrorCode.GraphqlError, e.message || e);
     }
-
-    this.ceramicConnect(targetAddr, alias);
+    if (DFLAG) {
+      this.ceramicConnect(targetAddr, alias);
+    }
   }
 
   async disconnect(targetAddr: string) {
@@ -404,7 +425,7 @@ class CyberConnect {
       if (resp?.data?.unfollow.result !== 'SUCCESS') {
         throw new ConnectError(
           ErrorCode.GraphqlError,
-          resp?.data?.unfollow.result
+          resp?.data?.unfollow.result,
         );
       }
 
@@ -412,8 +433,9 @@ class CyberConnect {
     } catch (e: any) {
       throw new ConnectError(ErrorCode.GraphqlError, e.message || e);
     }
-
-    this.ceramicDisconnect(targetAddr);
+    if (DFLAG) {
+      this.ceramicDisconnect(targetAddr);
+    }
   }
 
   async setAlias(targetAddr: string, alias: string) {
@@ -434,7 +456,7 @@ class CyberConnect {
       if (resp?.data?.setAlias.result !== 'SUCCESS') {
         throw new ConnectError(
           ErrorCode.GraphqlError,
-          resp?.data?.setAlias.result
+          resp?.data?.setAlias.result,
         );
       }
 
@@ -442,8 +464,9 @@ class CyberConnect {
     } catch (e: any) {
       throw new ConnectError(ErrorCode.GraphqlError, e.message || e);
     }
-
-    this.ceramicSetAlias(targetAddr, alias);
+    if (DFLAG) {
+      this.ceramicSetAlias(targetAddr, alias);
+    }
   }
 }
 
