@@ -278,7 +278,13 @@ class CyberConnect {
     }
     try {
       if (!DFLAG) {
-        await cAuth(this.provider, this.address, this.endpoint.cyberConnectApi);
+        console.log(this.provider);
+        await cAuth(
+          this.provider,
+          this.address,
+          this.endpoint.cyberConnectApi,
+          this.chain,
+        );
       } else {
         await this.setupAuthProvider();
         await this.setupDid();
@@ -390,6 +396,7 @@ class CyberConnect {
         namespace: this.namespace,
         url: this.endpoint.cyberConnectApi,
         signature: sign!,
+        network: this.chain,
       });
 
       if (resp?.data?.follow.result !== 'SUCCESS') {
@@ -420,6 +427,7 @@ class CyberConnect {
         url: this.endpoint.cyberConnectApi,
         namespace: this.namespace,
         signature: sign,
+        network: this.chain,
       });
 
       if (resp?.data?.unfollow.result !== 'SUCCESS') {
@@ -451,6 +459,7 @@ class CyberConnect {
         namespace: this.namespace,
         signature: sign,
         alias,
+        network: this.chain,
       });
 
       if (resp?.data?.setAlias.result !== 'SUCCESS') {
