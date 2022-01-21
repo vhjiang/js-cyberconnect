@@ -279,25 +279,9 @@ class CyberConnect {
   }
   // first step
   async authenticate() {
-    if (!this.address) {
-      try {
-        this.address = await getAddressByProvider(this.provider, this.chain);
-      } catch (e) {
-        throw new ConnectError(ErrorCode.AuthProviderError, e as string);
-      }
-    }
-
-    this.authWithSigningKey();
-    return;
     try {
       if (!DFLAG) {
-        console.log(this.provider);
-        await cAuth(
-          this.provider,
-          this.address,
-          this.endpoint.cyberConnectApi,
-          this.chain,
-        );
+        this.authWithSigningKey();
       } else {
         await this.setupAuthProvider();
         await this.setupDid();
@@ -430,7 +414,6 @@ class CyberConnect {
       network: this.chain,
     };
 
-
     try {
       // const sign = await this.signWithJwt();
 
@@ -491,7 +474,6 @@ class CyberConnect {
       network: this.chain,
     };
 
-
     try {
       // const sign = await this.signWithJwt();
 
@@ -504,11 +486,10 @@ class CyberConnect {
 
       if (resp?.data?.disconnect.result !== 'SUCCESS') {
         throw new ConnectError(
-            ErrorCode.GraphqlError,
-            resp?.data?.follow.result,
+          ErrorCode.GraphqlError,
+          resp?.data?.follow.result,
         );
       }
-
     } catch (e: any) {
       throw new ConnectError(ErrorCode.GraphqlError, e.message || e);
     }
@@ -551,7 +532,6 @@ class CyberConnect {
       network: this.chain,
     };
 
-
     try {
       // const sign = await this.signWithJwt();
 
@@ -564,11 +544,10 @@ class CyberConnect {
 
       if (resp?.data?.alias.result !== 'SUCCESS') {
         throw new ConnectError(
-            ErrorCode.GraphqlError,
-            resp?.data?.follow.result,
+          ErrorCode.GraphqlError,
+          resp?.data?.follow.result,
         );
       }
-
     } catch (e: any) {
       throw new ConnectError(ErrorCode.GraphqlError, e.message || e);
     }
@@ -579,7 +558,6 @@ class CyberConnect {
 
   async authWithSigningKey() {
     const acknowledgement =
-
       'I authorize CyberConnect from this device using signing key:\n';
     const publicKey = await getPublicKey();
 
