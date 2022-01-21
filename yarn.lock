@@ -888,6 +888,11 @@
     "statuses" ">= 1.5.0 < 2"
     "toidentifier" "1.0.0"
 
+"idb@^7.0.0":
+  "integrity" "sha512-jSx0WOY9Nj+QzP6wX5e7g64jqh8ExtDs/IAuOrOEZCD/h6+0HqyrKsDMfdJc0hqhSvh0LsrwqrkDn+EtjjzSRA=="
+  "resolved" "https://registry.npmjs.org/idb/-/idb-7.0.0.tgz"
+  "version" "7.0.0"
+
 "ieee754@^1.1.13":
   "integrity" "sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA=="
   "resolved" "https://registry.npmjs.org/ieee754/-/ieee754-1.2.1.tgz"
@@ -1087,6 +1092,11 @@
   "version" "2.4.0"
   dependencies:
     "shortid" "^2.2.8"
+
+"prettier@^2.5.1":
+  "integrity" "sha512-vBZcPRUR5MZJwoyi3ZoyQlc1rXeEck8KgeC9AwwOn+exuxLxq5toTRDTSaVrXHxelDMHy9zlicw8u66yxoSUFg=="
+  "resolved" "https://registry.npmjs.org/prettier/-/prettier-2.5.1.tgz"
+  "version" "2.5.1"
 
 "query-string@^7.0.0", "query-string@7.0.1":
   "integrity" "sha512-uIw3iRvHnk9to1blJCG3BTc+Ro56CBowJXKmNNAm3RulvPBzWLRqKSiiDk+IplJhsydwtuNMHi8UGQFcCLVfkA=="

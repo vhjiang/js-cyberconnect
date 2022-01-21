@@ -52,3 +52,15 @@ export interface Endpoint {
   cyberConnectSchema: string;
   cyberConnectApi: string;
 }
+
+export type OperationName = 'follow' | 'unfollow';
+
+export interface Operation {
+  name: OperationName;
+  from: string;
+  to: string;
+  namespace: string;
+  network: Blockchain;
+  alias: string;
+  timestamp: number;
+}

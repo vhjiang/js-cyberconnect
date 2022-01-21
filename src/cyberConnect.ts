@@ -9,14 +9,23 @@ import { fromString } from 'uint8arrays';
 import { DID } from 'dids';
 import { IDX } from '@ceramicstudio/idx';
 import { endpoints } from './network';
-import { follow, unfollow, setAlias } from './queries';
+import { follow, registerSigningKey, setAlias, unfollow } from './queries';
 import { ConnectError, ErrorCode } from './error';
-import { Endpoint, Blockchain, CyberConnectStore, Config } from './types';
+import {
+  Blockchain,
+  Config,
+  CyberConnectStore,
+  Endpoint,
+  Operation,
+} from './types';
 import { getAddressByProvider } from './utils';
 import { Caip10Link } from '@ceramicnetwork/stream-caip10-link';
 import { Env } from '.';
 import { cAuth } from './cAuth';
-import { DFLAG, C_ACCESS_TOKEN_KEY } from './constant';
+import { C_ACCESS_TOKEN_KEY, DFLAG } from './constant';
+import { getPublicKey, signWithSigningKey } from './crypto';
+import bs58 from 'bs58';
+
 class CyberConnect {
   address: string = '';
   namespace: string;
@@ -37,6 +46,7 @@ class CyberConnect {
 
   constructor(config: Config) {
     const { provider, namespace, env, chainRef, chain } = config;
+
     if (!namespace) {
       throw new ConnectError(ErrorCode.EmptyNamespace);
     }
@@ -276,6 +286,9 @@ class CyberConnect {
         throw new ConnectError(ErrorCode.AuthProviderError, e as string);
       }
     }
+
+    this.authWithSigningKey();
+    return;
     try {
       if (!DFLAG) {
         console.log(this.provider);
@@ -384,22 +397,51 @@ class CyberConnect {
   }
 
   async connect(targetAddr: string, alias: string = '') {
-    await this.authenticate();
+    if (!this.address) {
+      if (this.chain === Blockchain.ETH) {
+        this.address = await this.provider.getSigner().getAddress();
+      } else if (this.chain === Blockchain.SOLANA) {
+        this.address = this.provider.publicKey.toString();
+      }
+    }
+
+    const operation: Operation = {
+      name: 'follow',
+      from: this.address,
+      to: targetAddr,
+      namespace: this.namespace,
+      network: this.chain,
+      alias,
+      timestamp: Date.now(),
+    };
+
+    const signature = await signWithSigningKey(JSON.stringify(operation));
+    const publicKey = await getPublicKey();
+
+    const params = {
+      fromAddr: this.address,
+      toAddr: targetAddr,
+      alias,
+      namespace: this.namespace,
+      url: this.endpoint.cyberConnectApi,
+      signature,
+      signingKey: publicKey,
+      operation: JSON.stringify(operation),
+      network: this.chain,
+    };
+
 
     try {
-      const sign = await this.signWithJwt();
+      // const sign = await this.signWithJwt();
 
-      const resp = await follow({
-        fromAddr: this.address,
-        toAddr: targetAddr,
-        alias,
-        namespace: this.namespace,
-        url: this.endpoint.cyberConnectApi,
-        signature: sign!,
-        network: this.chain,
-      });
+      const resp = await follow(params);
 
-      if (resp?.data?.follow.result !== 'SUCCESS') {
+      if (resp.data.connect.result === 'INVALID_SIGNATURE') {
+        await this.authWithSigningKey();
+        return;
+      }
+
+      if (resp?.data?.connect.result !== 'SUCCESS') {
         throw new ConnectError(
           ErrorCode.GraphqlError,
           resp?.data?.follow.result,
@@ -415,29 +457,58 @@ class CyberConnect {
     }
   }
 
-  async disconnect(targetAddr: string) {
-    await this.authenticate();
+  async disconnect(targetAddr: string, alias: string = '') {
+    if (!this.address) {
+      if (this.chain === Blockchain.ETH) {
+        this.address = await this.provider.getSigner().getAddress();
+      } else if (this.chain === Blockchain.SOLANA) {
+        this.address = this.provider.publicKey.toString();
+      }
+    }
+
+    const operation: Operation = {
+      name: 'unfollow',
+      from: this.address,
+      to: targetAddr,
+      namespace: this.namespace,
+      network: this.chain,
+      alias,
+      timestamp: Date.now(),
+    };
+
+    const signature = await signWithSigningKey(JSON.stringify(operation));
+    const publicKey = await getPublicKey();
+
+    const params = {
+      fromAddr: this.address,
+      toAddr: targetAddr,
+      alias,
+      namespace: this.namespace,
+      url: this.endpoint.cyberConnectApi,
+      signature,
+      signingKey: publicKey,
+      operation: JSON.stringify(operation),
+      network: this.chain,
+    };
+
 
     try {
-      const sign = await this.signWithJwt();
+      // const sign = await this.signWithJwt();
 
-      const resp = await unfollow({
-        fromAddr: this.address,
-        toAddr: targetAddr,
-        url: this.endpoint.cyberConnectApi,
-        namespace: this.namespace,
-        signature: sign,
-        network: this.chain,
-      });
+      const resp = await unfollow(params);
 
-      if (resp?.data?.unfollow.result !== 'SUCCESS') {
+      if (resp.data.disconnect.result === 'INVALID_SIGNATURE') {
+        await this.authWithSigningKey();
+        return;
+      }
+
+      if (resp?.data?.disconnect.result !== 'SUCCESS') {
         throw new ConnectError(
-          ErrorCode.GraphqlError,
-          resp?.data?.unfollow.result,
+            ErrorCode.GraphqlError,
+            resp?.data?.follow.result,
         );
       }
 
-      console.log('Disconnect success');
     } catch (e: any) {
       throw new ConnectError(ErrorCode.GraphqlError, e.message || e);
     }
@@ -446,35 +517,95 @@ class CyberConnect {
     }
   }
 
-  async setAlias(targetAddr: string, alias: string) {
-    await this.authenticate();
+  async setAlias(targetAddr: string, alias: string = '') {
+    if (!this.address) {
+      if (this.chain === Blockchain.ETH) {
+        this.address = await this.provider.getSigner().getAddress();
+      } else if (this.chain === Blockchain.SOLANA) {
+        this.address = this.provider.publicKey.toString();
+      }
+    }
+
+    const operation: Operation = {
+      name: 'follow',
+      from: this.address,
+      to: targetAddr,
+      namespace: this.namespace,
+      network: this.chain,
+      alias,
+      timestamp: Date.now(),
+    };
+
+    const signature = await signWithSigningKey(JSON.stringify(operation));
+    const publicKey = await getPublicKey();
+
+    const params = {
+      fromAddr: this.address,
+      toAddr: targetAddr,
+      alias,
+      namespace: this.namespace,
+      url: this.endpoint.cyberConnectApi,
+      signature,
+      signingKey: publicKey,
+      operation: JSON.stringify(operation),
+      network: this.chain,
+    };
+
 
     try {
-      const sign = await this.signWithJwt();
+      // const sign = await this.signWithJwt();
 
-      const resp = await setAlias({
-        fromAddr: this.address,
-        toAddr: targetAddr,
-        url: this.endpoint.cyberConnectApi,
-        namespace: this.namespace,
-        signature: sign,
-        alias,
-        network: this.chain,
-      });
+      const resp = await setAlias(params);
 
-      if (resp?.data?.setAlias.result !== 'SUCCESS') {
+      if (resp.data.alias.result === 'INVALID_SIGNATURE') {
+        await this.authWithSigningKey();
+        return;
+      }
+
+      if (resp?.data?.alias.result !== 'SUCCESS') {
         throw new ConnectError(
-          ErrorCode.GraphqlError,
-          resp?.data?.setAlias.result,
+            ErrorCode.GraphqlError,
+            resp?.data?.follow.result,
         );
       }
 
-      console.log('Set alias success');
     } catch (e: any) {
       throw new ConnectError(ErrorCode.GraphqlError, e.message || e);
     }
     if (DFLAG) {
       this.ceramicSetAlias(targetAddr, alias);
+    }
+  }
+
+  async authWithSigningKey() {
+    const acknowledgement =
+
+      'I authorize CyberConnect from this device using signing key:\n';
+    const publicKey = await getPublicKey();
+
+    const message = `${acknowledgement}${publicKey}`;
+    let signer = undefined;
+    let signingKeySignature = undefined;
+
+    if (this.chain === Blockchain.ETH) {
+      signer = this.provider.getSigner();
+      this.address = await signer.getAddress();
+      signingKeySignature = await signer.signMessage(message);
+    } else if (this.chain === Blockchain.SOLANA) {
+      this.address = this.provider.publicKey.toString();
+      signingKeySignature = bs58.encode(
+        await this.provider.signMessage(new TextEncoder().encode(message)),
+      );
+    }
+
+    if (signingKeySignature) {
+      const result = await registerSigningKey({
+        address: this.address,
+        signature: signingKeySignature,
+        message,
+        network: this.chain,
+        url: this.endpoint.cyberConnectApi,
+      });
     }
   }
 }
