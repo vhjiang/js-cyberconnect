@@ -11,7 +11,7 @@ if (typeof window !== 'undefined' && typeof window.indexedDB !== 'undefined') {
 }
 
 export async function get(key: string) {
-  if(dbPromise) {
+  if (dbPromise) {
     return (await dbPromise).get('store', key);
   }
 
@@ -19,7 +19,7 @@ export async function get(key: string) {
 }
 
 export async function set(key: string, val: CryptoKeyPair) {
-  if(dbPromise) {
+  if (dbPromise) {
     return (await dbPromise).put('store', val, key);
   }
 
@@ -52,6 +52,10 @@ export async function generateSigningKey() {
   set('signingKey', signingKey).then();
 
   return signingKey;
+}
+
+export async function hasSigningKey() {
+  return await get('signingKey');
 }
 
 export async function getSigningKey() {

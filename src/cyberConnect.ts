@@ -23,7 +23,7 @@ import { Caip10Link } from '@ceramicnetwork/stream-caip10-link';
 import { Env } from '.';
 import { cAuth } from './cAuth';
 import { C_ACCESS_TOKEN_KEY, DFLAG } from './constant';
-import { getPublicKey, signWithSigningKey } from './crypto';
+import { getPublicKey, hasSigningKey, signWithSigningKey } from './crypto';
 import bs58 from 'bs58';
 
 class CyberConnect {
@@ -381,6 +381,7 @@ class CyberConnect {
   }
 
   async connect(targetAddr: string, alias: string = '') {
+    await this.authWithSigningKey();
     if (!this.address) {
       if (this.chain === Blockchain.ETH) {
         this.address = await this.provider.getSigner().getAddress();
@@ -430,8 +431,6 @@ class CyberConnect {
           resp?.data?.follow.result,
         );
       }
-
-      console.log('Connect success');
     } catch (e: any) {
       throw new ConnectError(ErrorCode.GraphqlError, e.message || e);
     }
@@ -441,6 +440,7 @@ class CyberConnect {
   }
 
   async disconnect(targetAddr: string, alias: string = '') {
+    await this.authWithSigningKey();
     if (!this.address) {
       if (this.chain === Blockchain.ETH) {
         this.address = await this.provider.getSigner().getAddress();
@@ -499,6 +499,7 @@ class CyberConnect {
   }
 
   async setAlias(targetAddr: string, alias: string = '') {
+    await this.authWithSigningKey();
     if (!this.address) {
       if (this.chain === Blockchain.ETH) {
         this.address = await this.provider.getSigner().getAddress();
@@ -557,10 +558,13 @@ class CyberConnect {
   }
 
   async authWithSigningKey() {
+    if (await hasSigningKey()) {
+      return;
+    }
+
+    const publicKey = await getPublicKey();
     const acknowledgement =
       'I authorize CyberConnect from this device using signing key:\n';
-    const publicKey = await getPublicKey();
-
     const message = `${acknowledgement}${publicKey}`;
     let signer = undefined;
     let signingKeySignature = undefined;
@@ -577,7 +581,7 @@ class CyberConnect {
     }
 
     if (signingKeySignature) {
-      const result = await registerSigningKey({
+      const response = await registerSigningKey({
         address: this.address,
         signature: signingKeySignature,
         message,
