@@ -23,7 +23,7 @@ import { Caip10Link } from '@ceramicnetwork/stream-caip10-link';
 import { Env } from '.';
 import { cAuth } from './cAuth';
 import { C_ACCESS_TOKEN_KEY, DFLAG } from './constant';
-import { getPublicKey, hasSigningKey, signWithSigningKey } from './crypto';
+import {clearSigningKey, getPublicKey, hasSigningKey, signWithSigningKey} from './crypto';
 import bs58 from 'bs58';
 
 class CyberConnect {
@@ -421,6 +421,7 @@ class CyberConnect {
       const resp = await follow(params);
 
       if (resp.data.connect.result === 'INVALID_SIGNATURE') {
+        await clearSigningKey();
         await this.authWithSigningKey();
         return;
       }
@@ -480,6 +481,7 @@ class CyberConnect {
       const resp = await unfollow(params);
 
       if (resp.data.disconnect.result === 'INVALID_SIGNATURE') {
+        await clearSigningKey();
         await this.authWithSigningKey();
         return;
       }
@@ -539,6 +541,7 @@ class CyberConnect {
       const resp = await setAlias(params);
 
       if (resp.data.alias.result === 'INVALID_SIGNATURE') {
+        await clearSigningKey();
         await this.authWithSigningKey();
         return;
       }

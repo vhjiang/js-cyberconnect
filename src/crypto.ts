@@ -30,6 +30,10 @@ export async function clear() {
   return (await dbPromise).clear('store');
 }
 
+export async function clearSigningKey() {
+  await clear();
+}
+
 export async function rotateSigningKey() {
   await clear();
   return generateSigningKey();
