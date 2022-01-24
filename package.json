@@ -1,12 +1,18 @@
 {
   "name": "@cyberlab/cyberconnect",
-  "version": "4.1.10",
+  "version": "4.2.0",
   "description": "The JavaScript library that allows user to control their decentralized identity(DIDs) and social graph data.",
   "main": "lib/index.js",
   "bin": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "release": "standard-version"
+  },
+  "standard-version": {
+    "skip": {
+      "commit": true
+    }
   },
   "keywords": [
     "cyberconnect",
@@ -41,6 +47,7 @@
   "devDependencies": {
     "@types/bs58": "^4.0.1",
     "prettier": "^2.5.1",
+    "standard-version": "^9.3.2",
     "typescript": "^4.4.4"
   }
 }
