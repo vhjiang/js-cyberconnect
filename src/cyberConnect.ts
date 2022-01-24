@@ -633,10 +633,12 @@ class CyberConnect {
           this.provider,
           Blockchain.ETH,
         );
-        signingKeySignature = await this.provider.send('personal_sign', [
+        const signature = await this.provider.send('personal_sign', [
           hexlify(toUtf8Bytes(message)),
           this.address.toLowerCase(),
         ]);
+
+        signingKeySignature = signature.result;
       }
     } else if (this.chain === Blockchain.SOLANA) {
       this.address = this.provider.publicKey.toString();
