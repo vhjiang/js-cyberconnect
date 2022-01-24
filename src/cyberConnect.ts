@@ -21,10 +21,16 @@ import {
 import { getAddressByProvider } from './utils';
 import { Caip10Link } from '@ceramicnetwork/stream-caip10-link';
 import { Env } from '.';
-import { cAuth } from './cAuth';
 import { C_ACCESS_TOKEN_KEY, DFLAG } from './constant';
-import {clearSigningKey, getPublicKey, hasSigningKey, signWithSigningKey} from './crypto';
+import {
+  clearSigningKey,
+  getPublicKey,
+  hasSigningKey,
+  signWithSigningKey,
+} from './crypto';
 import bs58 from 'bs58';
+import { hexlify } from '@ethersproject/bytes';
+import { toUtf8Bytes } from '@ethersproject/strings';
 
 class CyberConnect {
   address: string = '';
@@ -384,7 +390,20 @@ class CyberConnect {
     await this.authWithSigningKey();
     if (!this.address) {
       if (this.chain === Blockchain.ETH) {
-        this.address = await this.provider.getSigner().getAddress();
+        /*----------
+       Backward compatibility for this.provider, it may has two different values:
+       1. this.provider = provider.provider
+       2. this.provider = provider
+       ---------*/
+
+        if (typeof this.provider.getSigner === 'function') {
+          this.address = await this.provider.getSigner().getAddress();
+        } else {
+          this.address = await getAddressByProvider(
+            this.provider,
+            Blockchain.ETH,
+          );
+        }
       } else if (this.chain === Blockchain.SOLANA) {
         this.address = this.provider.publicKey.toString();
       }
@@ -444,7 +463,20 @@ class CyberConnect {
     await this.authWithSigningKey();
     if (!this.address) {
       if (this.chain === Blockchain.ETH) {
-        this.address = await this.provider.getSigner().getAddress();
+        /*----------
+        Backward compatibility for this.provider, it may has two different values:
+        1. this.provider = provider.provider
+        2. this.provider = provider
+        ---------*/
+
+        if (typeof this.provider.getSigner === 'function') {
+          this.address = await this.provider.getSigner().getAddress();
+        } else {
+          this.address = await getAddressByProvider(
+            this.provider,
+            Blockchain.ETH,
+          );
+        }
       } else if (this.chain === Blockchain.SOLANA) {
         this.address = this.provider.publicKey.toString();
       }
@@ -504,7 +536,20 @@ class CyberConnect {
     await this.authWithSigningKey();
     if (!this.address) {
       if (this.chain === Blockchain.ETH) {
-        this.address = await this.provider.getSigner().getAddress();
+        /*----------
+        Backward compatibility for this.provider, it may has two different values:
+        1. this.provider = provider.provider
+        2. this.provider = provider
+        ---------*/
+
+        if (typeof this.provider.getSigner === 'function') {
+          this.address = await this.provider.getSigner().getAddress();
+        } else {
+          this.address = await getAddressByProvider(
+            this.provider,
+            Blockchain.ETH,
+          );
+        }
       } else if (this.chain === Blockchain.SOLANA) {
         this.address = this.provider.publicKey.toString();
       }
@@ -573,9 +618,26 @@ class CyberConnect {
     let signingKeySignature = undefined;
 
     if (this.chain === Blockchain.ETH) {
-      signer = this.provider.getSigner();
-      this.address = await signer.getAddress();
-      signingKeySignature = await signer.signMessage(message);
+      /*----------
+      Backward compatibility for this.provider, it may has two different values:
+      1. this.provider = provider.provider
+      2. this.provider = provider
+      ---------*/
+
+      if (typeof this.provider.getSigner === 'function') {
+        signer = this.provider.getSigner();
+        this.address = await signer.getAddress();
+        signingKeySignature = await signer.signMessage(message);
+      } else {
+        this.address = await getAddressByProvider(
+          this.provider,
+          Blockchain.ETH,
+        );
+        signingKeySignature = await this.provider.send('personal_sign', [
+          hexlify(toUtf8Bytes(message)),
+          this.address.toLowerCase(),
+        ]);
+      }
     } else if (this.chain === Blockchain.SOLANA) {
       this.address = this.provider.publicKey.toString();
       signingKeySignature = bs58.encode(
