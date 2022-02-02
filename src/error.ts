@@ -6,7 +6,7 @@ export class ConnectError {
   constructor(code: ErrorCode, message?: string) {
     this.code = code;
     this.message = message || errors[code];
-    if (!DFLAG) {
+    if (!DFLAG && window && window.localStorage) {
       delete window.localStorage[C_ACCESS_TOKEN_KEY];
     }
   }
