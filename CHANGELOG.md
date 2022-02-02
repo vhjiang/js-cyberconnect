@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.2.1](https://github.com/cybertino/cyberconnect/compare/v4.2.0...v4.2.1) (2022-02-02)
+
+
+### Bug Fixes
+
+* compatible for provider signature ([598300c](https://github.com/cybertino/cyberconnect/commit/598300c88950106568a4932cf824fae493dcd338))
+
 ## 4.2.0 (2022-01-24)
 
 
