@@ -27,6 +27,7 @@ import {
   getPublicKey,
   hasSigningKey,
   signWithSigningKey,
+  clearSigningKeyByAddress
 } from './crypto';
 
 class CyberConnect {
@@ -398,8 +399,11 @@ class CyberConnect {
         timestamp: Date.now(),
       };
 
-      const signature = await signWithSigningKey(JSON.stringify(operation));
-      const publicKey = await getPublicKey();
+      const signature = await signWithSigningKey(
+        JSON.stringify(operation),
+        this.address,
+      );
+      const publicKey = await getPublicKey(this.address);
 
       const params = {
         fromAddr: this.address,
@@ -455,8 +459,11 @@ class CyberConnect {
         timestamp: Date.now(),
       };
 
-      const signature = await signWithSigningKey(JSON.stringify(operation));
-      const publicKey = await getPublicKey();
+      const signature = await signWithSigningKey(
+        JSON.stringify(operation),
+        this.address,
+      );
+      const publicKey = await getPublicKey(this.address);
 
       const params = {
         fromAddr: this.address,
@@ -512,8 +519,11 @@ class CyberConnect {
         timestamp: Date.now(),
       };
 
-      const signature = await signWithSigningKey(JSON.stringify(operation));
-      const publicKey = await getPublicKey();
+      const signature = await signWithSigningKey(
+        JSON.stringify(operation),
+        this.address,
+      );
+      const publicKey = await getPublicKey(this.address);
 
       const params = {
         fromAddr: this.address,
@@ -564,41 +574,46 @@ class CyberConnect {
   }
 
   async authWithSigningKey() {
-    if (await hasSigningKey()) {
+    if (await hasSigningKey(this.address)) {
       return;
     }
 
-    const publicKey = await getPublicKey();
+    const publicKey = await getPublicKey(this.address);
     const acknowledgement =
       'I authorize CyberConnect from this device using signing key:\n';
     const message = `${acknowledgement}${publicKey}`;
 
     this.address = await this.getAddress();
-    const signingKeySignature = await getSigningKeySignature(
-      this.provider,
-      this.chain,
-      message,
-      this.address,
-    );
-
-    if (signingKeySignature) {
-      const resp = await registerSigningKey({
-        address: this.address,
-        signature: signingKeySignature,
+    try {
+      const signingKeySignature = await getSigningKeySignature(
+        this.provider,
+        this.chain,
         message,
-        network: this.chain,
-        url: this.endpoint.cyberConnectApi,
-      });
-
-      if (resp?.data?.registerKey.result !== 'SUCCESS') {
-        throw new ConnectError(
-          ErrorCode.GraphqlError,
-          resp?.data?.alias.result,
-        );
+        this.address,
+      );
+      if (signingKeySignature) {
+        const resp = await registerSigningKey({
+          address: this.address,
+          signature: signingKeySignature,
+          message,
+          network: this.chain,
+          url: this.endpoint.cyberConnectApi,
+        });
+  
+        if (resp?.data?.registerKey.result !== 'SUCCESS') {
+          throw new ConnectError(
+            ErrorCode.GraphqlError,
+            resp?.data?.alias.result,
+          );
+        }
+      } else {
+        throw new Error('signingKeySignature is empty');
       }
-    } else {
-      throw new Error('signingKeySignature is empty');
+    } catch (e) {
+      clearSigningKeyByAddress(this.address);
     }
+
+    
   }
 }
 
