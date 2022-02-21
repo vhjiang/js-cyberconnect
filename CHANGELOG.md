@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.3.0](https://github.com/cybertino/cyberconnect/compare/v4.2.2...v4.3.0) (2022-02-21)
+
+
+### Features
+
+* add signing message display field ([30e0986](https://github.com/cybertino/cyberconnect/commit/30e09863dae349ae3b59e82fc86a9ff67a4fdb2f))
+
 ## [4.2.2](https://github.com/cybertino/cyberconnect/compare/v4.2.1...v4.2.2) (2022-02-14)
 
 ### Bug Fixes
