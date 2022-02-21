@@ -28,6 +28,7 @@ export interface ConfigBase {
   namespace: string;
   env?: keyof typeof Env;
   provider: any;
+  signingMessageEntity?: string;
 }
 
 export interface ConfigEth {

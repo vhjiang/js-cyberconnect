@@ -27,7 +27,7 @@ import {
   getPublicKey,
   hasSigningKey,
   signWithSigningKey,
-  clearSigningKeyByAddress
+  clearSigningKeyByAddress,
 } from './crypto';
 
 class CyberConnect {
@@ -47,9 +47,10 @@ class CyberConnect {
   did: DID | null = null;
   threeId: ThreeIdProvider | null = null;
   threeIdProvider: any = null;
-
+  signingMessageEntity: string | undefined = '';
   constructor(config: Config) {
-    const { provider, namespace, env, chainRef, chain } = config;
+    const { provider, namespace, env, chainRef, chain, signingMessageEntity } =
+      config;
 
     if (!namespace) {
       throw new ConnectError(ErrorCode.EmptyNamespace);
@@ -61,7 +62,7 @@ class CyberConnect {
     this.chain = chain || Blockchain.ETH;
     this.chainRef = chainRef || '';
     this.provider = provider;
-
+    this.signingMessageEntity = signingMessageEntity;
     const keyDidResolver = KeyDidResolver.getResolver();
     const threeIdResolver = ThreeIdResolver.getResolver(this.ceramicClient);
 
@@ -579,8 +580,9 @@ class CyberConnect {
     }
 
     const publicKey = await getPublicKey(this.address);
-    const acknowledgement =
-      'I authorize CyberConnect from this device using signing key:\n';
+    const acknowledgement = `I authorize ${
+      this.signingMessageEntity || 'CyberConnect'
+    } from this device using signing key:\n`;
     const message = `${acknowledgement}${publicKey}`;
 
     this.address = await this.getAddress();
@@ -599,7 +601,7 @@ class CyberConnect {
           network: this.chain,
           url: this.endpoint.cyberConnectApi,
         });
-  
+
         if (resp?.data?.registerKey.result !== 'SUCCESS') {
           throw new ConnectError(
             ErrorCode.GraphqlError,
@@ -611,9 +613,8 @@ class CyberConnect {
       }
     } catch (e) {
       clearSigningKeyByAddress(this.address);
+      throw new Error('User cancel the sign process');
     }
-
-    
   }
 }
 
