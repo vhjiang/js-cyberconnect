@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.3.1](https://github.com/cybertino/cyberconnect/compare/v4.3.0...v4.3.1) (2022-02-25)
+
+
+### Features
+
+* add batch connect ([24a3398](https://github.com/cybertino/cyberconnect/commit/24a3398fe2adf43c435abbe88c72bc70befa03f3))
+
 ## [4.3.0](https://github.com/cybertino/cyberconnect/compare/v4.2.2...v4.3.0) (2022-02-21)
 
 
