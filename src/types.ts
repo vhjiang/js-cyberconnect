@@ -54,14 +54,22 @@ export interface Endpoint {
   cyberConnectApi: string;
 }
 
-export type OperationName = 'follow' | 'unfollow';
+export type OperationName = 'follow' | 'like' | 'report' | 'watch' | 'vote';
 
+export enum ConnectionType {
+  FOLLOW = 'FOLLOW',
+  LIKE = 'LIKE',
+  REPORT = 'REPORT',
+  WATCH = 'WATCH',
+  VOTE = 'VOTE',
+}
 export interface Operation {
-  name: OperationName;
+  name: OperationName | 'unfollow';
   from: string;
   to: string;
   namespace: string;
   network: Blockchain;
   alias?: string;
   timestamp: number;
+  connectionType?: ConnectionType;
 }

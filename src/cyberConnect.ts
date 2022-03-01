@@ -23,6 +23,8 @@ import {
   CyberConnectStore,
   Endpoint,
   Operation,
+  ConnectionType,
+  OperationName,
 } from './types';
 import { getAddressByProvider, getSigningKeySignature } from './utils';
 import { Caip10Link } from '@ceramicnetwork/stream-caip10-link';
@@ -391,18 +393,20 @@ class CyberConnect {
     }
   }
 
-  async connect(targetAddr: string, alias: string = '') {
+  async connect(
+    targetAddr: string,
+    alias: string = '',
+    connectionType: ConnectionType = ConnectionType.FOLLOW,
+  ) {
     try {
       this.address = await this.getAddress();
       await this.authWithSigningKey();
-
       const operation: Operation = {
-        name: 'follow',
+        name: connectionType.toLowerCase() as OperationName,
         from: this.address,
         to: targetAddr,
         namespace: this.namespace,
         network: this.chain,
-        alias,
         timestamp: Date.now(),
       };
 
@@ -421,6 +425,7 @@ class CyberConnect {
         signingKey: publicKey,
         operation: JSON.stringify(operation),
         network: this.chain,
+        type: connectionType,
       };
 
       // const sign = await this.signWithJwt();
@@ -450,11 +455,13 @@ class CyberConnect {
     }
   }
 
-  async batchConnect(targetAddrs: string[]) {
+  async batchConnect(
+    targetAddrs: string[],
+    connectionType: ConnectionType = ConnectionType.FOLLOW,
+  ) {
     try {
       this.address = await this.getAddress();
       await this.authWithSigningKey();
-
       const timestamp = Date.now();
       const signPromises: Promise<{
         toAddr: string;
@@ -464,7 +471,7 @@ class CyberConnect {
 
       targetAddrs.forEach((addr) => {
         const operation: Operation = {
-          name: 'follow',
+          name: connectionType.toLowerCase() as OperationName,
           from: this.address,
           to: addr,
           namespace: this.namespace,
@@ -496,6 +503,7 @@ class CyberConnect {
         signingInputs,
         signingKey: publicKey,
         network: this.chain,
+        type: connectionType,
       };
 
       const resp = await batchFollow(params, this.endpoint.cyberConnectApi);
@@ -533,7 +541,6 @@ class CyberConnect {
         to: targetAddr,
         namespace: this.namespace,
         network: this.chain,
-        alias,
         timestamp: Date.now(),
       };
 
@@ -546,7 +553,6 @@ class CyberConnect {
       const params = {
         fromAddr: this.address,
         toAddr: targetAddr,
-        alias,
         namespace: this.namespace,
         signature,
         signingKey: publicKey,
