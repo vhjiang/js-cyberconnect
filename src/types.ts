@@ -63,28 +63,35 @@ export type OperationName =
   | 'vote';
 
 export enum ConnectionTypeEnum {
-  FOLLOW,
-  LIKE,
-  REPORT,
-  WATCH,
-  VOTE,
+  UNFOLLOW = 'UNFOLLOW',
+  unfollow = 'UNFOLLOW',
+  FOLLOW = 'FOLLOW',
+  LIKE = 'LIKE',
+  REPORT = 'REPORT',
+  WATCH = 'WATCH',
+  VOTE = 'VOTE',
+  follow = 'FOLLOW',
+  like = 'LIKE',
+  report = 'REPORT',
+  watch = 'WATCH',
+  vote = 'VOTE',
 }
-export function converOperationNameToConnectionTypeString(
-  name: OperationName,
-): string {
-  switch (name) {
-    case 'like':
-      return ConnectionTypeEnum[1];
-    case 'report':
-      return ConnectionTypeEnum[2];
-    case 'watch':
-      return ConnectionTypeEnum[3];
-    case 'vote':
-      return ConnectionTypeEnum[4];
-    default:
-      return ConnectionTypeEnum[0];
-  }
-}
+// export function convertOperationNameToConnectionTypeString(
+//   name: OperationName,
+// ): string {
+//   switch (name) {
+//     case 'like':
+//       return ConnectionTypeEnum.follow;
+//     case 'report':
+//       return ConnectionTypeEnum.REPORT;
+//     case 'watch':
+//       return ConnectionTypeEnum.WATCH;
+//     case 'vote':
+//       return ConnectionTypeEnum[4];
+//     default:
+//       return ConnectionTypeEnum[0];
+//   }
+// }
 export interface Operation {
   name: OperationName;
   from: string;

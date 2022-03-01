@@ -25,7 +25,6 @@ import {
   Operation,
   ConnectionTypeEnum,
   OperationName,
-  converOperationNameToConnectionTypeString,
 } from './types';
 import { getAddressByProvider, getSigningKeySignature } from './utils';
 import { Caip10Link } from '@ceramicnetwork/stream-caip10-link';
@@ -397,14 +396,19 @@ class CyberConnect {
   async connect(
     targetAddr: string,
     alias: string = '',
-    operationName?: OperationName | 'follow',
+    operationName: OperationName = 'follow',
   ) {
+    if (operationName == 'unfollow') {
+      throw new ConnectError(
+        ErrorCode.OperationNameError,
+        'Wrong operation name, `unfollow` can only be used in `disconnect` function',
+      );
+    }
     try {
       this.address = await this.getAddress();
       await this.authWithSigningKey();
-
       const operation: Operation = {
-        name: operationName || 'follow',
+        name: operationName,
         from: this.address,
         to: targetAddr,
         namespace: this.namespace,
@@ -427,9 +431,7 @@ class CyberConnect {
         signingKey: publicKey,
         operation: JSON.stringify(operation),
         network: this.chain,
-        type: converOperationNameToConnectionTypeString(
-          operationName || 'follow',
-        ),
+        type: ConnectionTypeEnum[operationName],
       };
 
       // const sign = await this.signWithJwt();
@@ -459,11 +461,13 @@ class CyberConnect {
     }
   }
 
-  async batchConnect(targetAddrs: string[], operationName: OperationName) {
+  async batchConnect(
+    targetAddrs: string[],
+    operationName: OperationName = 'follow',
+  ) {
     try {
       this.address = await this.getAddress();
       await this.authWithSigningKey();
-
       const timestamp = Date.now();
       const signPromises: Promise<{
         toAddr: string;
@@ -473,7 +477,7 @@ class CyberConnect {
 
       targetAddrs.forEach((addr) => {
         const operation: Operation = {
-          name: 'follow',
+          name: operationName,
           from: this.address,
           to: addr,
           namespace: this.namespace,
@@ -505,9 +509,7 @@ class CyberConnect {
         signingInputs,
         signingKey: publicKey,
         network: this.chain,
-        type: converOperationNameToConnectionTypeString(
-          operationName || 'follow',
-        ),
+        type: ConnectionTypeEnum[operationName],
       };
 
       const resp = await batchFollow(params, this.endpoint.cyberConnectApi);
