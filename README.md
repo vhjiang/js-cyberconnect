@@ -61,11 +61,12 @@ await cyberConnect.authenticate();
 #### Connect
 
 ```ts
-cyberConnect.connect(targetAddr, alias);
+cyberConnect.connect(targetAddr, alias, connectionType);
 ```
 
 - `targetAddr` - The target wallet address to connect.
 - `alias` - (optional) Alias for the target address.
+- `connectionType` - (optional) connectionType of connect. Use ConnectionType i.e. ConnectionType.LIKE, default value is ConnectionType.FOLLOW
 
 #### Disconnect
 

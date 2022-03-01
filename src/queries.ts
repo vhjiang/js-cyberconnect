@@ -1,4 +1,4 @@
-import { Blockchain, ConnectionTypeEnum } from './types';
+import { Blockchain, ConnectionType } from './types';
 export type Query = 'connect' | 'disconnect';
 
 type RegisterSigningKeyInput = {
@@ -17,7 +17,7 @@ type UpdateConnectionInput = {
   signingKey: string;
   alias?: string;
   network: string;
-  type?: string;
+  type?: ConnectionType;
 };
 
 type BatchUpdateConnectionInput = {
@@ -30,7 +30,7 @@ type BatchUpdateConnectionInput = {
   namespace: string;
   signingKey: string;
   network: string;
-  type?: string;
+  type?: ConnectionType;
 };
 
 export const registerSigningKeySchema = (input: RegisterSigningKeyInput) => {

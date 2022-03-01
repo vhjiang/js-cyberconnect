@@ -25,7 +25,6 @@ export enum ErrorCode {
   CeramicError = 'CeramicError',
   AuthProviderError = 'AuthProviderError',
   SignJwtError = 'SignJwtError',
-  OperationNameError = 'OperationNameError',
 }
 
 const errors: { [key in ErrorCode]: string } = {
@@ -37,6 +36,4 @@ const errors: { [key in ErrorCode]: string } = {
   CeramicError: '',
   AuthProviderError: '',
   SignJwtError: '',
-  OperationNameError:
-    'Wrong operation name, `unfollow` can only be used in `disconnect` function',
 };

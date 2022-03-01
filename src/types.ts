@@ -54,51 +54,22 @@ export interface Endpoint {
   cyberConnectApi: string;
 }
 
-export type OperationName =
-  | 'follow'
-  | 'unfollow'
-  | 'like'
-  | 'report'
-  | 'watch'
-  | 'vote';
+export type OperationName = 'follow' | 'like' | 'report' | 'watch' | 'vote';
 
-export enum ConnectionTypeEnum {
-  UNFOLLOW = 'UNFOLLOW',
-  unfollow = 'UNFOLLOW',
+export enum ConnectionType {
   FOLLOW = 'FOLLOW',
   LIKE = 'LIKE',
   REPORT = 'REPORT',
   WATCH = 'WATCH',
   VOTE = 'VOTE',
-  follow = 'FOLLOW',
-  like = 'LIKE',
-  report = 'REPORT',
-  watch = 'WATCH',
-  vote = 'VOTE',
 }
-// export function convertOperationNameToConnectionTypeString(
-//   name: OperationName,
-// ): string {
-//   switch (name) {
-//     case 'like':
-//       return ConnectionTypeEnum.follow;
-//     case 'report':
-//       return ConnectionTypeEnum.REPORT;
-//     case 'watch':
-//       return ConnectionTypeEnum.WATCH;
-//     case 'vote':
-//       return ConnectionTypeEnum[4];
-//     default:
-//       return ConnectionTypeEnum[0];
-//   }
-// }
 export interface Operation {
-  name: OperationName;
+  name: OperationName | 'unfollow';
   from: string;
   to: string;
   namespace: string;
   network: Blockchain;
   alias?: string;
   timestamp: number;
-  connectionType?: ConnectionTypeEnum;
+  connectionType?: ConnectionType;
 }
