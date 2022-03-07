@@ -76,6 +76,15 @@ cyberConnect.disconnect(targetAddr);
 
 - `targetAddr` - The target wallet address to disconnect.
 
+#### BatchConnect
+
+```ts
+cyberConnect.batchConnect(targetAddrs, connectionType);
+```
+
+- `targetAddrs` - A list of wallet addresses to connect.
+- `connectionType` - (optional) The type of the connection. The default value is `Connection.FOLLOW`. See [Connection Type](#ConnectionType) for more details.
+
 #### SetAlias
 
 ```ts

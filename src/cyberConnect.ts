@@ -468,6 +468,7 @@ class CyberConnect {
         toAddr: string;
         signature: string;
         operation: string;
+        type: ConnectionType;
       }>[] = [];
 
       targetAddrs.forEach((addr) => {
@@ -490,6 +491,7 @@ class CyberConnect {
               toAddr: addr,
               signature,
               operation: JSON.stringify(operation),
+              type: connectionType,
             });
           }),
         );
@@ -504,7 +506,6 @@ class CyberConnect {
         signingInputs,
         signingKey: publicKey,
         network: this.chain,
-        type: connectionType,
       };
 
       const resp = await batchFollow(params, this.endpoint.cyberConnectApi);
