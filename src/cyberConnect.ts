@@ -408,6 +408,7 @@ class CyberConnect {
         namespace: this.namespace,
         network: this.chain,
         timestamp: Date.now(),
+        alias,
       };
 
       const signature = await signWithSigningKey(
