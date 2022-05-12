@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.4.2](https://github.com/cybertino/cyberconnect/compare/v4.4.1...v4.4.2) (2022-05-12)
+
+
+### Bug Fixes
+
+* remove unused code ([97fc6a9](https://github.com/cybertino/cyberconnect/commit/97fc6a9a2eca3aab87cf2ab9647288ef6f631d1f))
+
 ### [4.4.1](https://github.com/cybertino/cyberconnect/compare/v4.4.0...v4.4.1) (2022-03-07)
 
 
