@@ -1,37 +1,13 @@
-import { Blockchain, ConnectionType } from './types';
+import {
+  Blockchain,
+  RegisterSigningKeyInput,
+  UpdateConnectionInput,
+  BatchUpdateConnectionInput,
+  BiConnectInput,
+  AckNotificationsInput,
+  AckAllNotificationsInput,
+} from './types';
 export type Query = 'connect' | 'disconnect';
-
-type RegisterSigningKeyInput = {
-  address: string;
-  message: string;
-  signature: string;
-  network: string;
-};
-
-type UpdateConnectionInput = {
-  fromAddr: string;
-  toAddr: string;
-  namespace: string;
-  signature: string;
-  operation: string;
-  signingKey: string;
-  alias?: string;
-  network: string;
-  type?: ConnectionType;
-};
-
-type BatchUpdateConnectionInput = {
-  fromAddr: string;
-  signingInputs: {
-    toAddr: string;
-    signature: string;
-    operation: string;
-  }[];
-  namespace: string;
-  signingKey: string;
-  network: string;
-  type?: ConnectionType;
-};
 
 export const registerSigningKeySchema = (input: RegisterSigningKeyInput) => {
   return {
@@ -44,6 +20,7 @@ export const registerSigningKeySchema = (input: RegisterSigningKeyInput) => {
     variables: { input },
   };
 };
+
 export const connectQuerySchema = (input: UpdateConnectionInput) => {
   return {
     operationName: 'connect',
@@ -91,6 +68,51 @@ export const setAliasQuerySchema = (input: UpdateConnectionInput) => {
   };
 };
 
+export const bidirectionalConnectQuerySchema = (input: BiConnectInput) => {
+  return {
+    operationName: 'bidirectionalConnect',
+    query: `mutation bidirectionalConnect($input: BiConnectInput!) {
+      bidirectionalConnect(input: $input) {
+        result
+        message
+      }
+    }`,
+    variables: {
+      input,
+    },
+  };
+};
+
+export const ackNotificationsQuerySchema = (input: AckNotificationsInput) => {
+  return {
+    operationName: 'ackNotifications',
+    query: `mutation ackNotifications($input: AckNotificationsInput!) {
+      ackNotifications(input: $input) {
+        result
+      }
+    }`,
+    variables: {
+      input,
+    },
+  };
+};
+
+export const ackAllNotificationsQuerySchema = (
+  input: AckAllNotificationsInput,
+) => {
+  return {
+    operationName: 'ackAllNotifications',
+    query: `mutation ackAllNotifications($input: AckAllNotificationsInput!) {
+      ackAllNotifications(input: $input) {
+        result
+      }
+    }`,
+    variables: {
+      input,
+    },
+  };
+};
+
 export const authSchema = ({
   address,
   signature,
@@ -116,9 +138,12 @@ export const querySchemas = {
   connect: connectQuerySchema,
   batchConnect: batchConnectQuerySchema,
   disconnect: disconnectQuerySchema,
+  biConnect: bidirectionalConnectQuerySchema,
   auth: authSchema,
   setAlias: setAliasQuerySchema,
   registerSigningKey: registerSigningKeySchema,
+  ackNotifications: ackNotificationsQuerySchema,
+  ackAllNotifications: ackAllNotificationsQuerySchema,
 };
 
 export const request = async (url = '', data = {}) => {
@@ -200,5 +225,23 @@ export const unfollow = (input: UpdateConnectionInput, url: string) => {
 
 export const setAlias = (input: UpdateConnectionInput, url: string) => {
   const schema = querySchemas['setAlias'](input);
+  return handleQuery(schema, url);
+};
+
+export const biConnect = (input: BiConnectInput, url: string) => {
+  const schema = querySchemas['biConnect'](input);
+  return handleQuery(schema, url);
+};
+
+export const ackNotifications = (input: AckNotificationsInput, url: string) => {
+  const schema = querySchemas['ackNotifications'](input);
+  return handleQuery(schema, url);
+};
+
+export const ackAllNotifications = (
+  input: AckAllNotificationsInput,
+  url: string,
+) => {
+  const schema = querySchemas['ackAllNotifications'](input);
   return handleQuery(schema, url);
 };
