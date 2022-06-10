@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.5.0](https://github.com/cybertino/cyberconnect/compare/v4.4.2...v4.5.0) (2022-06-10)
+
+
+### Features
+
+*  add notification and bidirectional connection ([1b7a8db](https://github.com/cybertino/cyberconnect/commit/1b7a8db3c086a334ee17d3fa83f53ec62bd7ee87))
+
 ### [4.4.2](https://github.com/cybertino/cyberconnect/compare/v4.4.1...v4.4.2) (2022-05-12)
 
 
