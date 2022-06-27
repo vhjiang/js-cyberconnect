@@ -160,7 +160,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 const solanaProvider = useWallet();
 ```
 
-<b>Note</b>: You need to pass `chainRef` when you connect to Solana. Now we have three options: `Solana.SOLANA_MAINNET_CHAIN_REF`, `Solana.SOLANA_DEVNET_CHAIN_REF` and `Solana.SOLANA_TESTNET_CHAIN_REF`
+<b>Note</b>: `chainRef` is depreciated and will be removed in the future. You can pass empty string for `chainRef` for now.
 
 ```ts
 import CyberConnect, {
@@ -172,9 +172,9 @@ import CyberConnect, {
 const cyberConnect = new CyberConnect({
   namespace: 'CyberConnect',
   env: Env.Production,
-  chain: Blockchain.ETH,
+  chain: Blockchain.SOLANA,
   provider: solanaProvider,
-  chainRef: Solana.SOLANA_MAINNET_CHAIN_REF,
+  chainRef: '',
 });
 ```
 
